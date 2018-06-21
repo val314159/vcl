@@ -1,7 +1,39 @@
 #include"vcp.h"
 #include"prs.h"
 
-void alarm(int);
+typedef struct { int h,t; } cell;
+const int MemSz = 102400;
+cell Mem[MemSz];
+MemLen = 0;
+
+void*memcpy(void*,const void*,unsigned long);
+alarm(int);
+
+cell*_newcell(){return Mem + MemLen++;}
+#define cons(h,t)  _cons((int)(h),(int)(t))
+#define  consp(x) _consp((int)(x))
+#define    car(x)   _car((int)(x))
+#define    cdr(x)   _cdr((int)(x))
+_cons(h,t){_ = (int)memcpy(_newcell(),&(cell){h,t},sizeof(cell)); return _;}
+_consp(c){
+  if(!c)return 0;
+  if(c<(int)Mem      ) return -2;
+  if(c>(int)Mem+MemSz) return -1;
+  return 1;}
+_car(c){
+  switch(consp(c)){
+  case -2:
+  case -1: printf("CAR ERR\n"),exit(1);
+  default: _ = ((cell*)c)->h; return _;
+  case 0:  _ = 0;}
+  return _;}
+_cdr(c){
+  switch(consp(c)){
+  case -2:
+  case -1: printf("CDR ERR\n"),exit(1);
+  default: _ = ((cell*)c)->t; return _;
+  case 0:  _ = 0;}
+  return _;}
 
 Rws();
 Rnum2();
@@ -45,7 +77,7 @@ Ratum(){
   ELSE; { X(isalpha(NEXT)) id2           {_1 = token_reset();} }
   REND;}
 Rxprlst(){
-  RULE; { xpr xprlst }
+  RULE; { xpr xprlst {_2=_;} {_1=cons(_1,_2);} }
   ELSE; { }
   REND;}
 Rxpr(){
@@ -57,6 +89,22 @@ var _, c;
 char token[1024] = {0};
 vars xlist[1024] = {0}, T=0, X=0;
 
+pr(x){
+  if(!x) printf("[NULL]");
+  else if(abs(x) < 1024){
+    printf("{%d}", x);
+  }else{
+    printf("(");
+    pr(car(x));
+    x = cdr(x);
+    if(x){
+      printf(" . ");
+      pr(x);
+    }
+    printf(")");
+  }
+  return x;}
+
 main(){
   alarm(1);
   printf("====================\n");
@@ -65,6 +113,13 @@ main(){
   //LOG(",,,,,,,,,p %lld", tell());
   //LOG("ws  = %s", (char*)Rws());
   LOG(",,,,,,,,,p %lld", tell());
-  LOG("num = %s", (char*)Rxpr());
+  int r = Rxpr();
+  LOG("num = %d", r);
   LOG(",,,,,,,,,p %lld", tell());
+
+  pr(0);
+  pr(1);
+  pr(-1);
+  pr(cons(11,22));
+  pr(cons(11,0));
 }
