@@ -1,4 +1,4 @@
-CFLAGS=-Wno-implicit-int -m32
+CFLAGS=-Wno-implicit-int -Wno-unused-value -m32
 LDFLAGS=$(CFLAGS)
 all:
 	make main

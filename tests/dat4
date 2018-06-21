@@ -1,0 +1,17 @@
+ws   ( (isspace(any)) ws   ) ( )
+num2 ( (isdigit(any)) num2 ) ( )
+id2  ( (isalnum(any)) id2  ) ( )
+id   ( (isalpha(any)) id2     (ret gettoken()) )
+str2 ( '"' )  ( '\\' any str2 )  ( any str2 )
+atum
+  ( '\"' str2                 (ret gettoken()) )
+  ( '-' in("0123456789") num2 (ret gettoken()) )
+  (     in("0123456789") num2 (ret gettoken()) )
+  ( '\'' '\'' any '\''        (ret gettoken()) )
+  ( '\''      any '\''        (ret gettoken()) )
+  ( id )
+xprlst  (    xpr xprlst        (ret cons(1 2)) ) ( )
+pxprlst ( '('    xprlst ')' )  2
+xpr     ( ws id pxprlst ws ')' (ret cons(2 3)) )
+program ( ws     xprlst ws eof 2)
+

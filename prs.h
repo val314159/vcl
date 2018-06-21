@@ -1,50 +1,63 @@
-long MT=(long)"n/a";
-char null = 0;
-#define tell() lseek(0,0,1)
-#define LOG(fmt,...) printf("LOG: "fmt"\n",##__VA_ARGS__)
-#define ins(s) *(index((s),NEXT)?:&null)
-
-#include"vcp.h"
-#define do do{ (_1=MT),(token[T=t]=0),(X=x),lseek(0,p,0),0;
-#define returnx } return
-#define return(n) returnx(n)
-#define RET return 0;
-#define CAPTURE vars p=tell(),_1=MT,_2,_3,_4,_5,_6,_7,_8,_9,t=T,x=X
-
-#define RULE CAPTURE; do{
-#define ELSE return(_1);}while(0);do{ 
-#define REND return(_1);}while(0);RET
-
-#define BIF(x) if((x)<1) break;
-#define n(x) ((x)<1)
-
-extern var c, _;
-extern char token[];
-extern vars xlist[], T, X;
-
-token_reset(){
-  char*  strdup(const char*);
-  long t = (long)strdup(token);
-  token[T=0] = 0;
-  return t;}
-
-_readchar(){ return n(read(0,&c,1)) ? 0 : c; }
-readchar(){
-  int oldpos = tell();
-  int ret = read(0,&c,1);
-  //printf("readchar(oldpos = %d ret = %d\n", oldpos, ret);
-  //read %d %c => n %d\n", ret, (char)c, n(ret));
-  if(c>0) (token[T++] = c), (token[T] = 0);
-  return n(ret) ? 0 : c;
-}
-#define  X(xpr) if n(xpr) break;
-#define NX(xpr) if n(xpr) break;
-
-#define   NEXT readchar()
-#define    ANY X(NEXT)
-#define  IN(x) X(ins(x))
-#define  IS(c) X((c)==NEXT)
-
-long show(char*s, long x){
-  printf("[%s is %ld]\n", s, x);
-  return x;}
+Rws();
+Rnum2();
+Rid2();
+Rid();
+Rstr2();
+Ratum();
+Rxpr();
+Rxprlst();
+Rpxprlst();
+Rprogram();
+#define ws      if n(_=Rws())      break;
+#define num2    if n(_=Rnum2())    break;
+#define id2     if n(_=Rid2())     break;
+#define id      if n(_=Rid())      break;
+#define str2    if n(_=Rstr2())    break;
+#define atum    if n(_=Ratum())    break;
+#define xpr     if n(_=Rxpr())     break;
+#define xprlst  if n(_=Rxprlst())  break;
+#define pxprlst if n(_=Rpxprlst()) break;
+#define program if n(_=Rprogram()) break;
+Rws(){
+  RULE { X(isspace(NEXT)) ws }
+  ELSE { $$(token_reset())   }
+  REND}
+Rnum2(){
+  RULE { IN("012345679") num2 }
+  ELSE { }
+  REND}
+Rid2(){
+  RULE { X(isalnum(NEXT)) id2 }
+  ELSE { }
+  REND}
+Rid(){
+  RULE { X(isalpha(NEXT)) id2 $$(token_reset()) }
+  REND}
+Rstr2(){
+  RULE { IS('"')  }
+  ELSE { IS('\\') ANY str2 }
+  ELSE {          ANY str2 }
+  REND}
+Ratum(){
+  RULE { IS('\"')                 str2  $$(token_reset()) }
+  ELSE { IS('-')  IN("012345679") num2  $$(token_reset()) }
+  ELSE {          IN("012345679") num2  $$(token_reset()) }
+  ELSE { IS('\'') IS('\\') ANY IS('\'') $$(token_reset()) }
+  ELSE { IS('\'')          ANY IS('\'') $$(token_reset()) }
+  ELSE {  id __1 }
+  REND}
+Rxprlst(){
+  RULE { xpr __1 xprlst __2 $$(cons(_1,_2)) }
+  ELSE { }
+  REND}
+Rpxprlst(){
+  RULE { IS('(') xprlst __1 ws IS(')') }
+  REND}
+Rxpr(){
+  RULE { ws id      __1 pxprlst $$(cons(_1,_)) }
+  ELSE { ws atum    __1 }
+  ELSE { ws pxprlst __1 }
+  REND}
+Rprogram(){
+  RULE { ws      xprlst __2 ws eof $$(_2) }
+  REND}

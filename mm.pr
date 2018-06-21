@@ -1,0 +1,21 @@
+ws
+  isspace(NEXT) ws || {grabtok()}
+num
+  IN(digit) num ||
+id
+  IN(alnum) id ||
+str
+  IS('"') || IS('\\') ANY str || ANY str
+atum
+  IS('\"') str                   {grabtok()}
+  IS('-')  IN(digit) num         {grabtok()}
+           IN(digit) num         {grabtok()}
+           IN(alpha)    id       {grabtok()}
+  IS('\'') IS('\\') ANY IS('\'') {grabtok()}
+  IS('\'')          ANY IS('\'') {grabtok()}
+xprlst
+  xpr xprlst {cons(_,_)} ||
+xpr
+  ws atum || ws IS('(') xprlst ws IS(')')
+program
+  ws xprlst ws eof()
