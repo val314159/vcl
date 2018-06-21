@@ -1,0 +1,12 @@
+//ws     isspace(NEXT) ws || (gettok)
+//num    "012345679"  num ||
+//id     isalnum(NEXT) id ||
+//str    '"' || '\\' ANY str || ANY str 
+//atum   '\"' str             ($$ = (gettok))
+||       '-' "012345679" num  ($$ = (gettok))
+||           "012345679" num  ($$ = (gettok))
+||         '\'' '\\' ANY '\'' ($$ = (gettok))
+||         '\''      ANY '\'' ($$ = (gettok))
+||       isalpha(NEXT) id     ($$ = (gettok))
+//xprlst           xpr xprlst ($$ = cons($1 $2)) ||
+//xpr    ws atum ($$ = $2) || ws '(' xprlst ($$ = $3) ws ')'

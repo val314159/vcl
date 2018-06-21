@@ -53,7 +53,7 @@ Rxprlst();
 
 Rws(){
   RULE; { X(isspace(NEXT)) ws }
-  ELSE; { {token_reset();} }
+  ELSE; { {token_reset();}    }
   REND;}
 Rnum2(){
   RULE; { IN("012345679") num2 }
@@ -77,7 +77,7 @@ Ratum(){
   ELSE; { X(isalpha(NEXT)) id2           {_1 = token_reset();} }
   REND;}
 Rxprlst(){
-  RULE; { xpr xprlst {_2=_;} {_1=cons(_1,_2);} }
+  RULE; { xpr {_1=_;} xprlst {_2=_;} {_1=cons(_1,_2);} }
   ELSE; { }
   REND;}
 Rxpr(){
@@ -90,20 +90,16 @@ char token[1024] = {0};
 vars xlist[1024] = {0}, T=0, X=0;
 
 pr(x){
-  if(!x) printf("[NULL]");
-  else if(abs(x) < 1024){
-    printf("{%d}", x);
-  }else{
-    printf("(");
-    pr(car(x));
-    x = cdr(x);
-    if(x){
-      printf(" . ");
-      pr(x);
-    }
-    printf(")");
-  }
+  if(abs(x) < 1024) return printf("{%d}", x), x;
+  printf("("), pr(car(x));
+  for(x = cdr(x); consp(x)>0; x = cdr(x))
+    printf( " " ), pr(car(x));
+  if(x)
+    printf(" . "), pr(x);
+  printf(")");
   return x;}
+
+prn(x){ pr(x); printf("\n"); }
 
 main(){
   alarm(1);
@@ -116,10 +112,10 @@ main(){
   int r = Rxpr();
   LOG("num = %d", r);
   LOG(",,,,,,,,,p %lld", tell());
-
-  pr(0);
-  pr(1);
-  pr(-1);
-  pr(cons(11,22));
-  pr(cons(11,0));
+  
+  prn(0);
+  prn(1);
+  prn(-1);
+  prn(cons(11,22));
+  prn(cons(11,0));
 }
